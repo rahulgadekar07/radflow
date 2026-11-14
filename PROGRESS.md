@@ -2,48 +2,53 @@
 
 ## Day 1 — November 13, 2026
 
-### Completed and verified
-- [x] Create ChatGPT RadFlow Project and project notes
-- [x] Create GitHub monorepo with `ris-frontend/`, `dicom-viewer/`, `radflow-backend/`, and `infrastructure/`
-- [x] Commit and push initial directory structure to `main` (`7158b1d`)
-- [x] Generate Spring Boot backend (Java 17, Maven, Spring Boot 4.0.9)
-- [x] Fix IntelliJ Maven import by selecting installed Maven 3.9.12
-- [x] Compile and run backend successfully
-- [x] Implement and test `GET /api/health` in Postman (HTTP 200)
-- [x] Create local MySQL database `radflow_db`
-- [x] Add Spring Data JPA, MySQL and Flyway dependencies
-- [x] Configure environment-variable-based DB credentials
-- [x] Create `V1__initial_schema.sql`; observed `patients` and `flyway_schema_history` tables in HeidiSQL
-
-### Still to verify
-- [ ] Confirm V1 success record in `flyway_schema_history`
-- [ ] Confirm current backend code, migrations, and configuration are committed and pushed (only initial folder commit was verified)
-- [ ] Review Git ignore rules and tracked files for local credentials before pushing
-
-### Deferred
-- [ ] Angular frontend shell (CLI 22 requires a newer Node patch than installed)
-- [ ] React/Vite DICOM viewer shell
-- [ ] Initial project documentation committed in the monorepo
-
-### Environment / blockers
-- Windows 11, Java 17.0.12, global Maven 3.9.12, MySQL 8.0.46
-- Node 24.13.1; latest Angular CLI 22.2.7 requires Node 24.15.0 or another supported runtime
-- Global `ng` command was unavailable after installation. Do not change global Node/npm or remove global packages until impact on existing office projects is understood.
-- Maven Wrapper 3.10.0 encountered Windows temp-folder access errors; installed Maven 3.9.12 worked.
+### Completed
+- [x] Create the ChatGPT RadFlow Project and initial project notes.
+- [x] Create the GitHub monorepo with `ris-frontend/`, `dicom-viewer/`, `radflow-backend/` and `infrastructure/`.
+- [x] Push initial structure (`7158b1d`).
+- [x] Set up Java 17, Spring Boot 4.0.9, Maven and MySQL 8.0.
+- [x] Compile/start the backend and test `GET /api/health` (HTTP 200).
+- [x] Configure Spring Data JPA, MySQL and Flyway; create `radflow_db` and `V1__initial_schema.sql`.
 
 ## Day 2 — November 14, 2026
 
-### Goal
-Finish the foundation and push it safely, without changing or breaking the existing office development setup.
+### Foundation completed (earlier session)
+- [x] Set up and run the Angular 21 RIS frontend shell.
+- [x] Set up and run the React + TypeScript + Vite viewer shell.
+- [x] Push foundation work to GitHub (previous checkpoint `baf5cd1`).
+- [x] Confirm Flyway V1 success through the local schema history.
 
-### Plan (one task at a time; ~60–90 minutes if no new blockers)
-- [ ] **1. Safety and Git review (~15 min):** inspect `git status`, ignored/untracked files and `.gitignore`; ensure secrets, `.idea/`, `target/`, `node_modules/` and build outputs will not be committed. Check whether the current machine shares tools with office projects.
-- [ ] **2. Angular RIS shell (~20–25 min):** use project-local Angular CLI 21 with existing Node 24.13.1 (no global Node upgrade). Generate directly in `ris-frontend/`, install dependencies, and verify `localhost:4200`.
-- [ ] **3. React viewer shell (~15–20 min):** scaffold React + TypeScript with Vite inside `dicom-viewer/`, install dependencies and verify the Vite dev server. Do not install Cornerstone3D yet.
-- [ ] **4. Final checks and Git push (~15–20 min):** verify Flyway V1 history, ensure no credentials or generated dependencies are staged, commit backend + frontend shells + project docs, push to GitHub and confirm clean status.
+### Patient Registration backend (evening session)
+- [x] Diagnose failed Flyway V2: V1 had already created `patients`.
+- [x] Change V2 to `V2__alter_patients_table.sql`, resolve failed local migration history, and successfully apply V2.
+- [x] Verify Spring Boot starts, MySQL connects, Flyway reports version 2 and JPA initializes.
+- [x] Create `Patient` JPA entity.
+- [x] Create `PatientRepository` with `findByMrn` and `existsByMrn`; startup confirmed **1 JPA repository**.
+- [x] Create `PatientRegistrationRequest` DTO with validation annotations.
+- [x] Create `PatientRegistrationResponse` DTO (completion reported; not separately code-reviewed).
+- [x] Create `PatientService` constructor-injection skeleton.
+- [x] Create `MrnGenerator` (`RF-` plus padded database ID; completion reported, not separately code-reviewed).
+- [x] Commit and push patient foundation to `main`: **`7076de3`** (`feat(patient): add patient entity repository DTOs and service foundation`).
 
-### Next development session (after Day 2 foundation)
-Start the first patient registration vertical slice: Patient JPA entity → repository → service → DTO/controller → Postman test, with synthetic data only. Schedule authentication/security as a separate, focused stage.
+### Current design and known gaps
+- The `patients` table has a required `full_name` and a required unique `mrn`. V2 added nullable `first_name`, `last_name`, `phone`.
+- `MrnGenerator` derives MRN from the database ID, but a safe persistence sequence compatible with the current `mrn NOT NULL` constraint is **not implemented yet**.
+- The service does not yet register patients; no registration controller/endpoint or registration Postman tests have been completed.
+- Validation annotations will need `@Valid` at the controller boundary.
+- Confirm getters/setters exist in `Patient` and review current DTO/generator code during next session.
+- Git push was verified; a final post-push clean `git status` and credential/ignore review were not shown in the shared output.
+
+### Next session — one small vertical slice at a time
+1. Inspect current schema and decide a safe, concurrency-aware MRN persistence strategy; add a new Flyway migration if needed (do not edit applied V1/V2).
+2. Implement `PatientService.registerPatient()` and map request/response DTOs.
+3. Add `POST /api/patients` with `@Valid`; test happy path and validation/error paths in Postman with **synthetic patients only**.
+4. Verify database state, review changes, and commit only tested work.
 
 ### Working agreement
-One manageable task, verification, then the next. No changes to system-wide Node/npm/Angular tooling without evaluating impact on work projects.
+- Set a realistic 30–60 minute session target and work **one task at a time**: implement → review → test → proceed.
+- **Stop the session once the target is met**; do not automatically expand scope.
+- End sessions with verification, Git status, a concise progress update, and the next starting point.
+- Protect office development tooling and keep secrets and real patient data out of Git.
+
+### Environment
+Windows 11 · Java 17.0.12 · Spring Boot 4.0.9 · Maven 3.9.12 · MySQL 8.0.46 · Angular 21 · React + TypeScript + Vite.
