@@ -1,0 +1,4 @@
+ALTER TABLE patients
+    ADD COLUMN phone VARCHAR(20) NULL,
+    ADD COLUMN first_name VARCHAR(100) NULL,
+    ADD COLUMN last_name VARCHAR(100) NULL;
